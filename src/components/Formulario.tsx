@@ -10,6 +10,7 @@ import CampoAnioIngreso from "./CampoAnioIngreso.tsx";
 import CampoPromedio from "./CampoPromedio.tsx";
 import FormularioTelefono from "./FormularioTelefono.tsx";
 import CampoCorreoElectronico from "./CampoCorreoElectronico.tsx";
+import CampoFotografia from "./CampoFotografia.tsx";
 
 const steps = [
     "Cuenta y nacimiento",
@@ -18,11 +19,6 @@ const steps = [
     "Ingreso y promedio",
     "Contacto",
 ];
-const [archivo, setArchivo] = useState({
-    nombre: 'Foto',
-    descripcion: '',
-    extension: 'JPG',
-});
 
 const Formulario: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
@@ -63,9 +59,7 @@ const Formulario: React.FC = () => {
             case 4:
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
-                        <FormularioTelefono />
-
-                        <FormularioTelefono />
+                        <CampoFotografia/>
 
                         <FormularioTelefono />
 
