@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 
-const CampoAnioIngreso: React.FC = () => {
-    const [anioIngreso, setAnioIngreso] = useState<string>('');
+interface IngresoProp {
+    ingreso: string;
+}
+
+const CampoAnioIngreso: React.FC<IngresoProp> = ({ingreso}) => {
+    const [valor, setValor] = useState<string>(ingreso);
 
     const anioActual = new Date().getFullYear();
     const anioMaximo = anioActual - 4;
@@ -12,7 +16,7 @@ const CampoAnioIngreso: React.FC = () => {
         // Validar que sea numérico y menor o igual al año máximo
         if (/^\d{0,4}$/.test(value)) {
             if (value === '' || parseInt(value) <= anioMaximo) {
-                setAnioIngreso(value);
+                setValor(value);
             }
         }
     };
@@ -24,15 +28,9 @@ const CampoAnioIngreso: React.FC = () => {
             variant="outlined"
             fullWidth
             margin="normal"
-            type="number"
-            value={anioIngreso}
+            value={valor}
+            disabled={true}
             onChange={handleChange}
-            inputProps={{
-                max: anioMaximo,
-                min: 1910,
-                inputMode: 'numeric',
-            }}
-            helperText={`Debe ser menor o igual a ${anioMaximo}`}
         />
     );
 };

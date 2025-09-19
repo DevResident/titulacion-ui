@@ -1,30 +1,38 @@
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 
-const CampoSistema: React.FC = () => {
-    const [sistema, setSistema] = useState<string>('');
+interface DatoSistema{
+    sistema: string
+}
+
+const sistemasMap: Record<string, string> = {
+    ESC: "Escolarizado",
+    ED: "Educaci�n a Distancia",
+    SUA: "Sistema de UNniversidad Abierta"
+};
+
+const CampoSistema: React.FC<DatoSistema> = ({sistema}) => {
+    const [valor, setValor] = useState<string>(sistema);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSistema(e.target.value);
+        setValor(e.target.value);
     };
+
+    const displayValue = sistemasMap[valor] || valor;
 
     return (
         <TextField
             id="sistema"
-            select
             label="Sistema"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={sistema}
+            value={displayValue}
+            disabled = {true}
             onChange={handleChange}
             SelectProps={{ native: true }}
-            InputLabelProps={{ shrink: true }}
-        >
-            <option value="">Selecciona un sistema</option>
-            <option value="escolarizado">Escolarizado</option>
-            <option value="semiescolarizado">Semiescolarizado</option>
-        </TextField>
+            InputLabelProps={{ shrink: true }} />
+
     );
 };
 

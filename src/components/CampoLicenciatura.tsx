@@ -1,32 +1,30 @@
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 
-const CampoLicenciatura: React.FC = () => {
-    const [licenciatura, setLicenciatura] = useState<string>('');
+interface LicenciaturaProps{
+    licenciatura: string
+}
+
+const CampoLicenciatura: React.FC<LicenciaturaProps> = ({ licenciatura }) => {
+    const [valor, setValor] = useState<string>(licenciatura);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLicenciatura(e.target.value);
+        setValor(e.target.value);
     };
 
     return (
         <TextField
             id="licenciatura"
-            select
             label="Licenciatura"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={licenciatura}
+            value={valor}
             onChange={handleChange}
+            disabled={true}
             SelectProps={{ native: true }}
-            InputLabelProps={{ shrink: true }}
-        >
-            <option value="">Selecciona una licenciatura</option>
-            <option value="1">Administración</option>
-            <option value="2">Contaduría</option>
-            <option value="3">Informática</option>
-            <option value="4">Negocios Internacionales</option>
-        </TextField>
+            InputLabelProps={{ shrink: true }} />
+
     );
 };
 

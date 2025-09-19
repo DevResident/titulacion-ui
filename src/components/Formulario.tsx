@@ -21,11 +21,15 @@ const steps = [
 
 interface Datos {
     nombre: string;
-    apellidoPaterno: string;
-    apellidoMaterno: string;
+    primerApellido: string;
+    segundoApellido: string;
     sexo: string;
     nacionalidad: string;
     curp?: string;
+    licenciatura: string;
+    sistema: string;
+    ingreso: string;
+    promedio: number;
 }
 
 
@@ -33,12 +37,17 @@ const Formulario: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
 
     const [datos, setDatos] = useState<Datos>({
-        nombre: "Diana",
-        apellidoPaterno: "SANTIAGO",
-        apellidoMaterno: "GARCIA",
-        sexo: "femenino",
-        nacionalidad: "Mexicana",
-        curp: "SAGM750719MDFNRR03",
+        nombre: 'Diana',
+        primerApellido: '',
+        segundoApellido: 'GARCIA',
+        sexo: 'femenino',
+        nacionalidad: '',
+        curp: 'SAGM750719MDFNRR03',
+        licenciatura: '',
+        sistema: '',
+        ingreso: '',
+        promedio: 0.0
+
     });
 
     const [alumno, setAlumno] = useState({
@@ -51,7 +60,7 @@ const Formulario: React.FC = () => {
     const login= async (): Promise<string | null> => {
         try {
             const response = await axios.post<{ token: string }>(
-                "http://localhost:8082/auth/login",
+                "/api/auth/login",
                 {
                     usuario: alumno.numeroCuenta,
                     contrasenia: alumno.curp,
@@ -90,7 +99,7 @@ ${alumno.curp}`);
             return;
         }
         const response = await axios.post<Datos>(
-            "http://localhost:8082/alumno/buscar",
+            "/api/alumno/buscar",
             {
                 numeroCuenta: alumno.numeroCuenta, // string no vacío
                 curp: alumno.curp,                 // string
@@ -103,7 +112,7 @@ ${alumno.curp}`);
             }
         );
 
-            // 4️⃣ Guardar datos en estado
+            //  Guardar datos en estado
             setDatos(response.data);
 
     };
@@ -154,8 +163,8 @@ ${alumno.curp}`);
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <FormularioDatosPersonales nombre={datos.nombre}
-                                                   apellidoPaterno={datos.apellidoPaterno}
-                                                   apellidoMaterno={datos.apellidoMaterno}
+                                                   apellidoPaterno={datos.primerApellido}
+                                                   apellidoMaterno={datos.segundoApellido}
                                                    sexo={datos.sexo}
                                                    nacionalidad={datos.nacionalidad}
                                                    />
@@ -165,15 +174,15 @@ ${alumno.curp}`);
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <CampoUniversidad />
-                        <CampoLicenciatura />
-                        <CampoSistema />
+                        <CampoLicenciatura licenciatura={datos.licenciatura}/>
+                        <CampoSistema sistema={datos.sistema}/>
                     </Box>
                 );
             case 3:
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
-                        <CampoAnioIngreso />
-                        <CampoPromedio />
+                        <CampoAnioIngreso ingreso={datos.ingreso}/>
+                        <CampoPromedio promedio={datos.promedio}/>
                     </Box>
                 );
             case 4:

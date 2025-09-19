@@ -57,12 +57,12 @@ const FormularioDatosPersonales: React.FC<DatosPersonalesProps> = ({
                     value={sexo}
                     >
                     <FormControlLabel
-                        value="femenino"
+                        value="F"
                         control={<Radio />}
                         label="Femenino"
                     />
                     <FormControlLabel
-                        value="masculino"
+                        value="M"
                         control={<Radio />}
                         label="Masculino"
                     />
