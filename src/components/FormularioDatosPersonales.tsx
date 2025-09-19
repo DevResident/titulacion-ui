@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     TextField,
     RadioGroup,
@@ -9,24 +9,21 @@ import {
     Box
 } from '@mui/material';
 
-const FormularioDatosPersonales: React.FC = () => {
-    const [datos, setDatos] = useState({
-        nombre: 'MARTHA',
-        apellidoPaterno: 'SANTIAGO',
-        apellidoMaterno: 'GARCIA',
-        sexo: 'femenino',
-        nacionalidad: 'Mexicana',
-        curp: 'SAGM750719MDFNRR03',
-    });
+interface DatosPersonalesProps {
+    nombre: string;
+    apellidoPaterno: string;
+    apellidoMaterno: string;
+    sexo: string;
+    nacionalidad: string;
+}
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-
-        setDatos((prev) => ({
-            ...prev,
-            [name]: name === 'curp' ? value.toUpperCase() : value,
-        }));
-    };
+const FormularioDatosPersonales: React.FC<DatosPersonalesProps> = ({
+   nombre,
+   apellidoPaterno,
+   apellidoMaterno,
+   sexo,
+   nacionalidad,
+}) => {
 
     return (
         <Box>
@@ -35,24 +32,21 @@ const FormularioDatosPersonales: React.FC = () => {
                 margin="normal"
                 label="Apellido paterno"
                 name="apellidoPaterno"
-                value={datos.apellidoPaterno}
-                onChange={handleChange}
+                value={apellidoPaterno}
             />
             <TextField
                 fullWidth
                 margin="normal"
                 label="Apellido materno"
                 name="apellidoMaterno"
-                value={datos.apellidoMaterno}
-                onChange={handleChange}
+                value={apellidoMaterno}
             />
             <TextField
                 fullWidth
                 margin="normal"
                 label="Nombre(s)"
                 name="nombre"
-                value={datos.nombre}
-                onChange={handleChange}
+                value={nombre}
             />
 
             <FormControl component="fieldset" margin="normal">
@@ -60,9 +54,8 @@ const FormularioDatosPersonales: React.FC = () => {
                 <RadioGroup
                     row
                     name="sexo"
-                    value={datos.sexo}
-                    onChange={handleChange}
-                >
+                    value={sexo}
+                    >
                     <FormControlLabel
                         value="femenino"
                         control={<Radio />}
@@ -81,23 +74,10 @@ const FormularioDatosPersonales: React.FC = () => {
                 margin="normal"
                 label="Nacionalidad"
                 name="nacionalidad"
-                value={datos.nacionalidad}
-                onChange={handleChange}
+                value={nacionalidad}
             />
 
-            <TextField
-                fullWidth
-                margin="normal"
-                label="CURP"
-                name="curp"
-                value={datos.curp}
-                onChange={handleChange}
-                inputProps={{
-                    maxLength: 18,
-                    pattern: '[A-Z]{4}\\d{6}[HM][A-Z]{5}\\d{2}',
-                }}
-                helperText="Debe tener 18 caracteres y estar en mayúsculas"
-            />
+
         </Box>
     );
 };
