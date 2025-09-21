@@ -26,6 +26,10 @@ const CampoCorreoElectronico: React.FC = () => {
                 error={error}
                 helperText={error ? 'Correo inválido' : ''}
                 type="email"
+                required
+                inputProps={{
+                    maxLength: 75
+                }}
             />
         </Box>
     );

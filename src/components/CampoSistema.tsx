@@ -8,7 +8,7 @@ interface DatoSistema{
 const sistemasMap: Record<string, string> = {
     ESC: "Escolarizado",
     ED: "Educaci�n a Distancia",
-    SUA: "Sistema de UNniversidad Abierta"
+    SUA: "Sistema de Universidad Abierta"
 };
 
 const CampoSistema: React.FC<DatoSistema> = ({sistema}) => {
@@ -31,8 +31,8 @@ const CampoSistema: React.FC<DatoSistema> = ({sistema}) => {
             disabled = {true}
             onChange={handleChange}
             SelectProps={{ native: true }}
-            InputLabelProps={{ shrink: true }} />
-
+            InputLabelProps={{ shrink: true }}
+        />
     );
 };
 

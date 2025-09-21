@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { Box, Step, StepLabel, Stepper, TextField,Button } from "@mui/material";
 import FormularioDatosPersonales from "./FormularioDatosPersonales.tsx";
-import CampoUniversidad from "./CampoUniversidad.tsx";
+import CampoProcedencia from "./CampoProcedencia.tsx";
 import CampoLicenciatura from "./CampoLicenciatura.tsx";
 import CampoSistema from "./CampoSistema.tsx";
 import CampoAnioIngreso from "./CampoAnioIngreso.tsx";
 import CampoPromedio from "./CampoPromedio.tsx";
 import FormularioTelefono from "./FormularioTelefono.tsx";
 import CampoCorreoElectronico from "./CampoCorreoElectronico.tsx";
-import CampoFotografia from "./CampoFotografia.tsx";
 import axios from "axios";
 
 const steps = [
@@ -25,24 +24,21 @@ interface Datos {
     segundoApellido: string;
     sexo: string;
     nacionalidad: string;
-    curp?: string;
     licenciatura: string;
     sistema: string;
     ingreso: string;
     promedio: number;
 }
 
-
 const Formulario: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
 
     const [datos, setDatos] = useState<Datos>({
-        nombre: 'Diana',
+        nombre: '',
         primerApellido: '',
-        segundoApellido: 'GARCIA',
-        sexo: 'femenino',
+        segundoApellido: '',
+        sexo: '',
         nacionalidad: '',
-        curp: 'SAGM750719MDFNRR03',
         licenciatura: '',
         sistema: '',
         ingreso: '',
@@ -77,6 +73,7 @@ const Formulario: React.FC = () => {
             return null;
         }
     };
+
     const handleSubmit = async () => {
         try {
             const tokenObtenido = await login();
@@ -84,7 +81,7 @@ const Formulario: React.FC = () => {
 
             await loadData(tokenObtenido); // se lo pasamos directamente
             alert(`Formulario en el primer paso 
-${alumno.curp}`);
+            ${alumno.curp}`);
             handleNext();
         } catch (error) {
             console.error("Error en el flujo de login y carga:", error);
@@ -103,7 +100,6 @@ ${alumno.curp}`);
             {
                 numeroCuenta: alumno.numeroCuenta, // string no vacío
                 curp: alumno.curp,                 // string
-                nombreFotografia: ""                // aunque sea vacío, debe estar presente
             },
             {
                 headers: {
@@ -111,10 +107,8 @@ ${alumno.curp}`);
                 },
             }
         );
-
             //  Guardar datos en estado
             setDatos(response.data);
-
     };
 
     const handleNext = () => setActiveStep((prev) => prev + 1);
@@ -173,7 +167,7 @@ ${alumno.curp}`);
             case 2:
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
-                        <CampoUniversidad />
+                        <CampoProcedencia/>
                         <CampoLicenciatura licenciatura={datos.licenciatura}/>
                         <CampoSistema sistema={datos.sistema}/>
                     </Box>
@@ -188,13 +182,8 @@ ${alumno.curp}`);
             case 4:
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
-                        <CampoFotografia/>
-
-                        <FormularioTelefono />
-
-                        <FormularioTelefono />
-
                         <CampoCorreoElectronico />
+                        <FormularioTelefono />
                     </Box>
                 );
             default:

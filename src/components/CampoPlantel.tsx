@@ -1,27 +1,27 @@
 import React, {useState} from 'react';
 import TextField from '@mui/material/TextField';
 
-interface UniversidadProps{
-    universidad: string
+interface PlantelProps{
+    plantel: string
 }
 
-const universidadesMap: Record<string, string> = {
-    UNAM: "Universidad Nacional Autónoma de México",
+const plantelesMap: Record<string, string> = {
+    FCA: "Facultad de Contaduría y Administración",
 };
 
-const CampoUniversidad: React.FC<UniversidadProps> = ({ universidad }) => {
-    const [valor, setValor] = useState<string>(universidad);
+const CampoPlantel: React.FC<PlantelProps> = ({ plantel }) => {
+    const [valor, setValor] = useState<string>(plantel);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setValor(e.target.value);
     };
 
-    const displayValue = universidadesMap[valor] || valor;
+    const displayValue = plantelesMap[valor] || valor;
 
     return (
         <TextField
-            id="universidad"
-            label="Universidad"
+            id="plantel"
+            label="Plantel"
             variant="outlined"
             fullWidth
             margin="normal"
@@ -35,4 +35,4 @@ const CampoUniversidad: React.FC<UniversidadProps> = ({ universidad }) => {
     );
 };
 
-export default CampoUniversidad;
+export default CampoPlantel;
