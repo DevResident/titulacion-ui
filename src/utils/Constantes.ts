@@ -2,13 +2,13 @@
 export const HELP_FRAGMENTS = {
     FORMATO_JPG: 'En formato JPG.',
     FORMATO_PDF: 'En formato PDF.',
-    SELFIE: 'Fotografía estilo “selfie”.',
+    SELFIE: 'Fotografía estilo “selfie”. Reciente, a color y sin filtros',
     CUENTAS_ESPECIALES:
-        'Sólo los alumnos cuyo número de cuenta inicie con 1, 306, 307, 308, 309, 310 y 311.',
+        'Actualizada con el 100% de créditos, esta deberá tener la columna de exámenes ordinarios, extraordinarios',
     ANTIGUEDAD_3_MESES: 'No mayor a 3 meses de antigüedad.',
     CIEN_PORCIENTO_CREDITOS: 'Con 100% de créditos y reciente.',
     SOLO_NEGOCIOS_INT:
-        'Sólo alumnos de la licenciatura en Negocios Internacionales.',
+        ' ',
 } as const;
 
 export type HelpKey = keyof typeof HELP_FRAGMENTS;
@@ -29,34 +29,44 @@ export type Requisito = {
 
 export const REQUISITOS: Record<string, Requisito> = {
     fotografiaAlumno: {
-        label: 'Fotografía del alumno:',
+        label: 'Fotografía tomada con celular:',
         accept: ACCEPT.JPG,
-        help: ['FORMATO_JPG', 'SELFIE'],
+        help: ['FORMATO_JPG'],
     },
-    docPdfGenerico: {
-        label: 'Documento:',
+    historiaAcademica: {
+        label: 'Historia académica:',
         accept: ACCEPT.PDF,
         help: ['FORMATO_PDF'],
     },
-    docPdfAntiguedad3Meses: {
-        label: 'Comprobante:',
+    certificado: {
+        label: 'Certificado original de estudios anteriores al ingreso a la UNAM:',
         accept: ACCEPT.PDF,
-        help: ['FORMATO_PDF', 'ANTIGUEDAD_3_MESES'],
+        help: ['FORMATO_PDF'],
     },
-    docPdfCuentaEspecial: {
-        label: 'Documento (cuentas especiales):',
+    constanciaActividadesExtracurriculares: {
+        label: 'Constancia de actividades extracurriculares:',
         accept: ACCEPT.PDF,
-        help: ['FORMATO_PDF', 'CUENTAS_ESPECIALES'],
+        help: ['FORMATO_PDF'],
     },
-    docPdf100Creditos: {
-        label: 'Constancia:',
+    servicioSocial: {
+        label: 'Constancia de término de servicio social original:',
         accept: ACCEPT.PDF,
-        help: ['FORMATO_PDF', 'CIEN_PORCIENTO_CREDITOS'],
+        help: ['FORMATO_PDF'],
     },
-    docPdfSoloNegociosInt: {
-        label: 'Documento (Negocios Internacionales):',
+    actaNacimiento: {
+        label: 'Acta de nacimiento original:',
         accept: ACCEPT.PDF,
-        help: ['FORMATO_PDF', 'SOLO_NEGOCIOS_INT'],
+        help: ['FORMATO_PDF'],
+    },
+    CURP: {
+        label: 'CURP:',
+        accept: ACCEPT.PDF,
+        help: ['FORMATO_PDF'],
+    },
+    protestaUniversitaria: {
+        label: 'Protesta Universitaria:',
+        accept: ACCEPT.PDF,
+        help: ['FORMATO_PDF'],
     },
 } as const;
 

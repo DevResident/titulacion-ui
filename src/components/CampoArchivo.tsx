@@ -11,11 +11,11 @@ import {
 import UploadIcon from '@mui/icons-material/Upload';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { REQUISITOS, HELP_FRAGMENTS, fileMatchesAccept } from '../utils/Constantes';
+import { HELP_FRAGMENTS, fileMatchesAccept } from '../utils/Constantes';
 
-const CFG = REQUISITOS.fotografiaAlumno;
 
-export default function CampoFotografia() {
+// @ts-ignore
+export default function CampoArchivo(props) {
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export default function CampoFotografia() {
     const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         const f = e.target.files?.[0];
         if (!f) return;
-        if (!fileMatchesAccept(f, CFG.accept)) {
+        if (!fileMatchesAccept(f, props.CFG.accept)) {
             setError('Formato inválido. Solo JPG.');
             setFile(null);
             return;
@@ -45,19 +45,19 @@ export default function CampoFotografia() {
     const openPreview = () => file && setPreviewOpen(true);
 
     return (
-        <Box display="grid" gridTemplateColumns="1fr auto auto 1fr" alignItems="center" gap={2}>
+        <Box display="grid" gridTemplateColumns="1fr auto auto 1fr" alignItems="left" gap={2}>
             {/* Izquierda: etiqueta */}
-            <Typography variant="body1" textAlign="right">
-                {CFG.label}
+            <Typography variant="body1" textAlign="left">
+                {props.CFG.label}
             </Typography>
 
             {/* Centro: botón y acciones */}
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box display="flex" alignItems="left" gap={1}>
                 <input
                     ref={inputRef}
                     id="subir-foto"
                     type="file"
-                    accept={CFG.accept}
+                    accept={props.CFG.accept}
                     style={{ display: 'none' }}
                     onChange={onChange}
                 />
@@ -111,7 +111,7 @@ export default function CampoFotografia() {
 
             {/* Derecha: ayuda por fragmentos */}
             <Box>
-                {CFG.help.map((k: keyof typeof HELP_FRAGMENTS) => (
+                {props.CFG.help.map((k: keyof typeof HELP_FRAGMENTS) => (
                     <Typography
                         key={k}
                         variant="body2"

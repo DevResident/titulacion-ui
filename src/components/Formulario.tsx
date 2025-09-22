@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Step, StepLabel, Stepper, TextField,Button } from "@mui/material";
+import {Box, Step, StepLabel, Stepper, TextField, Button, Modal, Typography} from "@mui/material";
 import FormularioDatosPersonales from "./FormularioDatosPersonales.tsx";
 import CampoProcedencia from "./CampoProcedencia.tsx";
 import CampoLicenciatura from "./CampoLicenciatura.tsx";
@@ -9,6 +9,20 @@ import CampoPromedio from "./CampoPromedio.tsx";
 import FormularioTelefono from "./FormularioTelefono.tsx";
 import CampoCorreoElectronico from "./CampoCorreoElectronico.tsx";
 import axios from "axios";
+import CampoCodigoVerificacion from "./CampoCodigoVerificacion.tsx";
+import CampoArchivo from "./CampoArchivo.tsx";
+import {REQUISITOS} from "../utils/Constantes.ts";
+const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
 
 const steps = [
     "Cuenta y nacimiento",
@@ -16,6 +30,7 @@ const steps = [
     "Escolaridad",
     "Ingreso y promedio",
     "Contacto",
+    "Documentos",
 ];
 
 interface Datos {
@@ -32,23 +47,25 @@ interface Datos {
 
 const Formulario: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
-
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
     const [datos, setDatos] = useState<Datos>({
-        nombre: '',
-        primerApellido: '',
-        segundoApellido: '',
-        sexo: '',
-        nacionalidad: '',
-        licenciatura: '',
-        sistema: '',
-        ingreso: '',
-        promedio: 0.0
+        nombre: 'Diana Karen',
+        primerApellido: 'Herrera',
+        segundoApellido: 'Carrillo',
+        sexo: 'F',
+        nacionalidad: 'Mexicana',
+        licenciatura: 'Informatica',
+        sistema: 'Escolarizado',
+        ingreso: '2014',
+        promedio: 9.46
 
     });
 
     const [alumno, setAlumno] = useState({
         curp: '',
-        numeroCuenta: ''
+        numeroCuenta: '311217995'
     });
 
     const [token, setToken] = useState<string | null>(null);
@@ -71,6 +88,26 @@ const Formulario: React.FC = () => {
         } catch (error) {
             console.error("Error en login:", error);
             return null;
+        }
+    };
+
+    const handleValidarCorreo = async () => {
+        try {
+            handleOpen();
+        } catch (error) {
+            console.error("Error en el flujo de login y carga:", error);
+        }
+    };
+    const validarNumeroCuenta = () => {
+        const permitidos = ["1", "306", "307", "308", "309", "310", "311"];
+        return (permitidos.some(prefijo => alumno.numeroCuenta.startsWith(prefijo)))
+    }
+    const handleValidarCodigo = async () => {
+        try {
+            handleClose();
+            handleNext();
+        } catch (error) {
+            console.error("Error en el flujo de login y carga:", error);
         }
     };
 
@@ -113,8 +150,6 @@ const Formulario: React.FC = () => {
 
     const handleNext = () => setActiveStep((prev) => prev + 1);
     const handleBack = () => setActiveStep((prev) => prev - 1);
-    const handleChange = (e:React.ChangeEvent<HTMLInputElement>) =>
-        setAlumno(prev => ({...prev, curp: e.target.value}));
     const handleChangeNumero = (e:React.ChangeEvent<HTMLInputElement>) =>
         setAlumno(prev => ({...prev, numeroCuenta: e.target.value}));
 
@@ -138,19 +173,7 @@ const Formulario: React.FC = () => {
                                 pattern: '[0-9]*',
                             }}
                         />
-                        <TextField
-                            fullWidth
-                            margin="normal"
-                            label="CURP"
-                            name="curp"
-                            value={alumno.curp}
-                            onChange={handleChange}
-                            inputProps={{
-                                maxLength: 18,
-                                pattern: '[A-Z]{4}\\d{6}[HM][A-Z]{5}\\d{2}',
-                            }}
-                            helperText="Debe tener 18 caracteres y estar en mayúsculas"
-                        />
+                        <CampoCorreoElectronico />
                     </Box>
                 );
             case 1:
@@ -182,8 +205,27 @@ const Formulario: React.FC = () => {
             case 4:
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
-                        <CampoCorreoElectronico />
                         <FormularioTelefono />
+                    </Box>
+                );
+
+            case 5:
+                return (
+                    <Box display="flex" flexDirection="column" gap={2}>
+                        <CampoArchivo CFG={REQUISITOS.fotografiaAlumno}/>
+                        <CampoArchivo CFG={REQUISITOS.historiaAcademica}/>
+                        <CampoArchivo CFG={REQUISITOS.servicioSocial}/>
+                        <CampoArchivo CFG={REQUISITOS.actaNacimiento}/>
+                        <CampoArchivo CFG={REQUISITOS.protestaUniversitaria}/>
+                        { validarNumeroCuenta() &&
+                            <CampoArchivo CFG={REQUISITOS.certificado} />
+                        }
+                    </Box>
+                );
+            case 6:
+                return (
+                    <Box display="flex" flexDirection="column" gap={2}>
+                        <CampoArchivo CFG={REQUISITOS.fotografiaAlumno}/>
                     </Box>
                 );
             default:
@@ -212,8 +254,8 @@ const Formulario: React.FC = () => {
                     Atrás
                 </Button>
                 {activeStep === 0 ? (
-                    <Button variant="contained" onClick={handleSubmit}>
-                        Enviar
+                    <Button variant="contained" onClick={handleValidarCorreo}>
+                        Validar correo
                     </Button>
                 ) : (
                     <Button variant="contained" onClick={handleNext}>
@@ -221,6 +263,20 @@ const Formulario: React.FC = () => {
                     </Button>
                 )}
             </Box>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={style}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        Ingresa el código que enviamos a tu correo
+                    </Typography>
+                   <CampoCodigoVerificacion />
+                    <Button onClick={handleValidarCodigo}>Validar</Button>
+                </Box>
+            </Modal>
         </Box>
     );
 };
