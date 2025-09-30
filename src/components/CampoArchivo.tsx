@@ -47,7 +47,7 @@ export default function CampoArchivo(props) {
     return (
         <Box display="grid" gridTemplateColumns="1fr auto auto 1fr" alignItems="left" gap={2}>
             {/* Izquierda: etiqueta */}
-            <Typography variant="body1" textAlign="left">
+            <Typography variant="body1" textAlign="left" sx={{ width: "90%", margin: "0 27.5%" }}>
                 {props.CFG.label}
             </Typography>
 
