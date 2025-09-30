@@ -65,8 +65,8 @@ const Formulario: React.FC = () => {
     });
 
     const [alumno, setAlumno] = useState({
-        curp: "",
         numeroCuenta: "311217995",
+        curp: "",
     });
 
     const [correo, setCorreo] = useState("");
@@ -215,12 +215,7 @@ const Formulario: React.FC = () => {
                         )}
                     </Box>
                 );
-            /*case 6:
-                return (
-                    <Box display="flex" flexDirection="column" gap={2}>
 
-                    </Box>
-                );*/
             default:
                 return <div>Formulario completo</div>;
         }
