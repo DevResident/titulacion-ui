@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {Box, Step, StepLabel, Stepper, TextField, Button, Modal, Typography} from "@mui/material";
+import {Box, Step, StepLabel, Stepper, Button, Modal, Typography} from "@mui/material";
 import axios from "axios";
 
 import FormularioDatosPersonales from "./FormularioDatosPersonales.tsx";
@@ -204,7 +204,7 @@ const Formulario: React.FC = () => {
                 );
             case 5:
                 return (
-                    <Box display="flex" flexDirection="column" gap={2} sx={{margin: "0 10%"}}>
+                    <Box display="flex" flexDirection="column" gap={2} sx={{margin: "0 auto"}}>
                         <CampoArchivo CFG={REQUISITOS.fotografiaAlumno} />
                         <CampoArchivo CFG={REQUISITOS.historiaAcademica} />
                         <CampoArchivo CFG={REQUISITOS.servicioSocial} />
@@ -215,12 +215,12 @@ const Formulario: React.FC = () => {
                         )}
                     </Box>
                 );
-            case 6:
+            /*case 6:
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
 
                     </Box>
-                );
+                );*/
             default:
                 return <div>Formulario completo</div>;
         }

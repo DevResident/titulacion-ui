@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEventHandler } from 'react';
-import {
-    Box,
-    Button,
-    Typography,
-    IconButton,
-    Dialog,
-    DialogContent,
-} from '@mui/material';
+import { Box, Button, Typography, IconButton, Dialog, DialogContent } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -19,6 +12,7 @@ export default function CampoArchivo(props) {
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [previewIsPdf, setPreviewIsPdf] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,46 +26,91 @@ export default function CampoArchivo(props) {
     const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         const f = e.target.files?.[0];
         if (!f) return;
+
+        // valida formato
         if (!fileMatchesAccept(f, props.CFG.accept)) {
-            setError('Formato inválido. Solo JPG.');
+            setError('Formato inválido.');
             setFile(null);
             return;
         }
+
         setError('');
         setFile(f);
+        // marca si es PDF (por tipo o extensión)
+        setPreviewIsPdf(
+            f.type === 'application/pdf' || /\.pdf$/i.test(f.name)
+        );
     };
 
+    useEffect(() => {
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+        };
+    }, [previewUrl]);
+
     const openPicker = () => inputRef.current?.click();
-    const openPreview = () => file && setPreviewOpen(true);
+    const openPreview = () => {
+        if (!file || !previewUrl) return;
+        if (previewIsPdf) {
+            // Visor nativo del navegador en una nueva pestaña
+            window.open(previewUrl, '_blank', 'noopener,noreferrer');
+        } else {
+            setPreviewOpen(true); // Modal para foto
+        }
+    };
 
     return (
-        <Box display="grid" gridTemplateColumns="1fr auto auto 1fr" alignItems="left" gap={2}>
-            {/* Izquierda: etiqueta */}
-            <Typography variant="body1" textAlign="left" sx={{ width: "90%", margin: "0 27.5%" }}>
+        <Box
+            sx={{
+                // centra el bloque en la página
+                maxWidth: 1100,
+                mx: 'auto',
+
+                display: 'grid',
+                // columnas: etiqueta | botón | acciones | requisitos
+                gridTemplateColumns: {
+                    xs: '1fr', // mobile apilado
+                    sm: 'minmax(220px,1fr) 360px 80px minmax(300px,1fr)',
+                },
+                columnGap: 2,
+                rowGap: 1.5,
+                alignItems: 'center', // Afecta columnas 1 y 3
+                width: '100%',
+            }}
+        >
+            {/* Columna 1: etiqueta */}
+            <Typography
+                variant="body1"
+                sx={{
+                    justifySelf: { xs: 'start', sm: 'end' },
+                    pr: { sm: 1 },
+                    whiteSpace: 'nowrap',
+                }}
+            >
                 {props.CFG.label}
             </Typography>
 
-            {/* Centro: botón y acciones */}
-            <Box display="flex" alignItems="left" gap={1}>
+            {/* Columna 2: botón */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 360, maxWidth: '100%', height: 48 }}>
                 <input
                     ref={inputRef}
-                    id="subir-foto"
                     type="file"
                     accept={props.CFG.accept}
-                    style={{ display: 'none' }}
                     onChange={onChange}
+                    style={{ display: 'none' }}
                 />
 
-                {/* Botón: clickeable si NO hay archivo; bloqueado si SÍ hay archivo */}
                 <Button
                     variant="outlined"
                     onClick={!file ? openPicker : undefined}
                     disabled={!!file}
-                    startIcon={!file ? <UploadIcon /> : undefined} // ícono dentro del botón solo cuando no hay archivo
+                    startIcon={!file ? <UploadIcon /> : undefined}
                     sx={{
-                        width: 260,                  // ancho fijo
-                        justifyContent: 'center',    // texto centrado como en tu captura
-                        gap: 1,
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: 2,
+                        justifyContent: 'center',
+                        textTransform: 'none',
                     }}
                 >
                     <Box
@@ -88,45 +127,53 @@ export default function CampoArchivo(props) {
                         {file ? file.name : 'Subir archivo'}
                     </Box>
                 </Button>
+            </Box>
 
-                {/* Lápiz y ojo solo se muestra cuando ya hay archivo */}
-                {file && (
+            {/* Columna 3: acciones */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 1, minWidth: 72 }}>
+                {file ? (
                     <>
                         <IconButton aria-label="Cambiar archivo" onClick={openPicker}>
                             <EditIcon />
                         </IconButton>
-
                         <IconButton aria-label="Vista previa" onClick={openPreview} disabled={!previewUrl}>
                             <VisibilityIcon />
                         </IconButton>
                     </>
-                )}
-
-                {error && (
-                    <Typography variant="caption" color="error" sx={{ display: 'block', ml: 1 }}>
-                        {error}
-                    </Typography>
+                ) : (
+                    <Box sx={{ width: 72, height: 40 }} />
                 )}
             </Box>
 
-            {/* Derecha: ayuda por fragmentos */}
+            {/* Columna 4: requisito del archivo a subir */}
             <Box>
                 {props.CFG.help.map((k: keyof typeof HELP_FRAGMENTS) => (
                     <Typography
                         key={k}
                         variant="body2"
                         color="text.secondary"
-                        sx={{ fontStyle: 'italic', display: 'block' }}
+                        sx={{ fontStyle: 'italic', display: 'block', lineHeight: 1.4 }}
                     >
                         {HELP_FRAGMENTS[k]}
                     </Typography>
                 ))}
             </Box>
 
-            {/* Dialog de vista previa */}
-            <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="sm" fullWidth>
+            {/* Error: fila extra para error bajo el campo */}
+            {error && (
+                <Typography
+                    variant="caption"
+                    color="error"
+                    sx={{ gridColumn: { sm: '2 / 4' }, justifySelf: 'start' }}
+                >
+                    {error}
+                </Typography>
+            )}
+
+            {/* vista previa de la foto */}
+            <Dialog open={previewOpen && !previewIsPdf} onClose={() => setPreviewOpen(false)} maxWidth="sm" fullWidth>
                 <DialogContent>
-                    {previewUrl && (
+                    {previewUrl && !previewIsPdf && (
                         <img src={previewUrl} alt="Vista previa" style={{ width: '100%', display: 'block' }} />
                     )}
                 </DialogContent>
