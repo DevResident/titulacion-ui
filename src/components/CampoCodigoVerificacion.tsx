@@ -3,7 +3,7 @@ import { Box, TextField } from "@mui/material";
 
 type Props = {
     length?: number;            // default 6
-    value?: string;             // opcional, control total desde el padre
+    value?: string;             // control total desde formulario
     onChange?: (otp: string) => void;
     onComplete?: (otp: string) => void;
     autoFocus?: boolean;
@@ -16,6 +16,7 @@ const CampoCodigoVerificacion: React.FC<Props> = ({
                                                       onComplete,
                                                       autoFocus = true,
                                                   }) => {
+
     const [local, setLocal] = React.useState<string>("".padEnd(length, " "));
     const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -27,7 +28,6 @@ const CampoCodigoVerificacion: React.FC<Props> = ({
         }
     }, [value, length]);
 
-    const otp = typeof value === "string" ? value : local.replace(/\s/g, "");
     const setAt = (idx: number, char: string) => {
         const arr = (typeof value === "string" ? value.padEnd(length, " ") : local).split("");
         arr[idx] = char;
@@ -80,11 +80,15 @@ const CampoCodigoVerificacion: React.FC<Props> = ({
                                 inputsRef.current[i + 1]?.focus();
                             }
                         }}
-                        inputProps={{
-                            inputMode: "numeric",
-                            pattern: "[0-9]*",
-                            maxLength: 1,
-                            style: { textAlign: "center", width: "2.5rem" },
+                        slotProps={{
+                            input: {
+                                inputProps: {
+                                    inputMode: "numeric",
+                                    pattern: "[0-9]*",
+                                    maxLength: 1,
+                                },
+                                sx: { "& input": { textAlign: "center", width: "2.5rem" } },
+                            },
                         }}
                         autoFocus={autoFocus && i === 0}
                     />

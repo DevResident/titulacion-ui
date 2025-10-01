@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import {Box, Step, StepLabel, Stepper, Button, Modal, Typography} from "@mui/material";
-import axios from "axios";
+import { useAuth } from '../context/useAuth';
+import { solicitarCodigo, altaUsuarioYToken, loginConCredenciales } from '../services/auth.ts';
+import api from "../services/api";
 
 import FormularioDatosPersonales from "./FormularioDatosPersonales.tsx";
 import CampoProcedencia from "./CampoProcedencia.tsx";
@@ -14,6 +15,8 @@ import CampoCodigoVerificacion from "./CampoCodigoVerificacion.tsx";
 import CampoArchivo from "./CampoArchivo.tsx";
 import CampoNumeroCuenta from "./CampoNumeroCuenta.tsx";
 import { REQUISITOS } from "../utils/Constantes.ts";
+
+import {Box, Step, StepLabel, Stepper, Button, Modal, Typography} from "@mui/material";
 
 const style = {
     position: "absolute" as const,
@@ -48,9 +51,16 @@ interface Datos {
     promedio: number;
 }
 
+function getErrMsg(e: unknown, fallback = "Ocurrió un error") {
+    const maybe = e as { response?: { data?: { message?: string } } };
+    return maybe?.response?.data?.message ?? fallback;
+}
+
 const Formulario: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
     const [open, setOpen] = useState(false);
+
+    const { token, setToken } = useAuth();
 
     const [datos, setDatos] = useState<Datos>({
         nombre: "Diana Karen",
@@ -71,36 +81,12 @@ const Formulario: React.FC = () => {
 
     const [correo, setCorreo] = useState("");
     const [otp, setOtp] = useState("");
-    const [token, setToken] = useState<string | null>(null);
+    const [msg, setMsg] = useState<string | null>(null);
+    const [loadingEnviar, setLoadingEnviar] = useState(false);
+    const [loadingValidar, setLoadingValidar] = useState(false);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
-    const login = async (): Promise<string | null> => {
-        try {
-            const response = await axios.post<{ token: string }>(
-                "/api/auth/login",
-                {
-                    usuario: alumno.numeroCuenta,
-                    contrasenia: alumno.curp,
-                }
-            );
-            const tokenObtenido = response.data.token;
-            setToken(tokenObtenido);
-            return tokenObtenido;
-        } catch (error) {
-            console.error("Error en login:", error);
-            return null;
-        }
-    };
-
-    const handleValidarCorreo = async () => {
-        try {
-            handleOpen();
-        } catch (error) {
-            console.error("Error al abrir verificación:", error);
-        }
-    };
 
     const validarNumeroCuenta = () => {
         const permitidos = ["1", "306", "307", "308", "309", "310", "311"];
@@ -109,49 +95,59 @@ const Formulario: React.FC = () => {
         );
     };
 
+    const handleValidarCorreo = async () => {
+        try {
+            setMsg(null);
+            setLoadingEnviar(true);
+            await solicitarCodigo(correo.trim());
+            setMsg("El código se envió a tu correo");
+            handleOpen();
+        } catch (e) {
+            setMsg(getErrMsg(e, "No se pudo enviar el código"));
+        } finally {
+            setLoadingEnviar(false);
+        }
+    };
+
+    const loadData = async () => {
+        const { data } = await api.post<Datos>("/alumno/buscar");
+        setDatos(data);
+    };
+
     const handleValidarCodigo = async () => {
         try {
-            // aquí podrías verificar OTP en backend si aplica
-            handleClose();
-            handleNext();
-        } catch (error) {
-            console.error("Error al validar código:", error);
-        }
-    };
+            setMsg(null);
+            setLoadingValidar(true);
 
-    const handleSubmit = async () => {
-        try {
-            const tokenObtenido = await login();
-            if (!tokenObtenido) return;
+            const res = await altaUsuarioYToken({
+                numeroCuenta: alumno.numeroCuenta.trim(),
+                curp: alumno.curp.trim(),
+                correo: correo.trim(),
+                codigo: otp.trim(),
+            });
 
-            await loadData(tokenObtenido);
-            alert(`Formulario en el primer paso
-            ${alumno.curp}`);
-            handleNext();
-        } catch (error) {
-            console.error("Error en el flujo de login y carga:", error);
-        }
-    };
-
-    const loadData = async (tokenOverride?: string) => {
-        const authToken = tokenOverride ?? token;
-        if (!authToken) {
-            console.error("No hay token, primero haz login");
-            return;
-        }
-        const response = await axios.post<Datos>(
-            "/api/alumno/buscar",
-            {
-                numeroCuenta: alumno.numeroCuenta,
-                curp: alumno.curp,
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            if (res?.token) {
+                setToken(res.token);
+            } else {
+                const login = await loginConCredenciales(
+                    alumno.numeroCuenta.trim(),
+                    alumno.curp.trim()
+                );
+                setToken(login.token);
             }
-        );
-        setDatos(response.data);
+
+            handleClose();
+
+            // precargar datos del alumno
+            await loadData();
+
+            // avanza al siguiente paso
+            setActiveStep((s) => s + 1);
+        } catch (e) {
+            setMsg(getErrMsg(e, "Código inválido o expirado"));
+        } finally {
+            setLoadingValidar(false);
+        }
     };
 
     const handleNext = () => setActiveStep((prev) => prev + 1);
@@ -167,6 +163,11 @@ const Formulario: React.FC = () => {
                             onChange={(v) => setAlumno((p) => ({ ...p, numeroCuenta: v }))}
                         />
                         <CampoCorreoElectronico value={correo} onChange={setCorreo} />
+                        {!!msg && (
+                            <Typography sx={{ mt: 1 }} color={/✅/.test(msg) ? "success.main" : "error"}>
+                                {msg}
+                            </Typography>
+                        )}
                     </Box>
                 );
             case 1:
@@ -237,38 +238,31 @@ const Formulario: React.FC = () => {
                 <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined">
                     Atrás
                 </Button>
+
                 {activeStep === 0 ? (
-                    <Button variant="contained" onClick={handleValidarCorreo}>
-                        Validar correo
+
+                    <Button variant="contained" onClick={handleValidarCorreo} disabled={!alumno.numeroCuenta || !correo || loadingEnviar}>
+                        {loadingEnviar ? "Enviando…" : "Validar correo"}
                     </Button>
                 ) : (
-                    <Button variant="contained" onClick={handleNext}>
+                    <Button variant="contained" onClick={handleNext} disabled={activeStep === 1 && !token}>
                         Siguiente
                     </Button>
                 )}
             </Box>
 
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
+            <Modal open={open} onClose={handleClose}>
                 <Box sx={style}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                    <Typography variant="h6" component="h2">
                         Ingresa el código que enviamos a tu correo:
                     </Typography>
-                    <CampoCodigoVerificacion
-                        value={otp}
-                        onChange={setOtp}
-                        onComplete={setOtp}
-                    />
+                    <CampoCodigoVerificacion value={otp} onChange={setOtp} onComplete={setOtp} />
                     <Button
                         sx={{ mt: 2 }}
                         onClick={handleValidarCodigo}
-                        disabled={otp.length < 6}
+                        disabled={otp.length < 6 || loadingValidar}
                     >
-                        Validar
+                        {loadingValidar ? "Validando…" : "Validar"}
                     </Button>
                 </Box>
             </Modal>
