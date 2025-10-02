@@ -1,35 +1,21 @@
 import React, { useState } from "react";
+import {Box, Step, StepLabel, Stepper, Button, Typography} from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
 
-import {Box, Step, StepLabel, Stepper, Button, Modal, Typography} from "@mui/material";
+import FormularioDatosPersonales from "../components/FormularioDatosPersonales.tsx";
+import CampoProcedencia from "../components/CampoProcedencia.tsx";
+import CampoLicenciatura from "../components/CampoLicenciatura.tsx";
+import CampoSistema from "../components/CampoSistema.tsx";
+import CampoAnioIngreso from "../components/CampoAnioIngreso.tsx";
+import CampoPromedio from "../components/CampoPromedio.tsx";
+import FormularioTelefono from "../components/FormularioTelefono.tsx";
+import CampoCorreoElectronico from "../components/CampoCorreoElectronico.tsx";
+import CampoArchivo from "../components/CampoArchivo.tsx";
+import CampoNumeroCuenta from "../components/CampoNumeroCuenta.tsx";
 
-import { useAuth } from '../context/useAuth';
-import { solicitarCodigo, altaUsuarioYToken, loginConCredenciales } from '../services/auth.ts';
-import api from "../services/api";
-
-import FormularioDatosPersonales from "./FormularioDatosPersonales.tsx";
-import CampoProcedencia from "./CampoProcedencia.tsx";
-import CampoLicenciatura from "./CampoLicenciatura.tsx";
-import CampoSistema from "./CampoSistema.tsx";
-import CampoAnioIngreso from "./CampoAnioIngreso.tsx";
-import CampoPromedio from "./CampoPromedio.tsx";
-import FormularioTelefono from "./FormularioTelefono.tsx";
-import CampoCorreoElectronico from "./CampoCorreoElectronico.tsx";
-import CampoCodigoVerificacion from "./CampoCodigoVerificacion.tsx";
-import CampoArchivo from "./CampoArchivo.tsx";
-import CampoNumeroCuenta from "./CampoNumeroCuenta.tsx";
-import { REQUISITOS } from "../utils/Constantes.ts";
-
-const style = {
-    position: "absolute" as const,
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-};
+import { REQUISITOS } from "../utils/constantes.ts";
+import { useAuth } from '../hooks/useAuth.ts';
+import { useOtp } from "../hooks/useOtp.ts";
 
 const steps = [
     "Valida tu identidad",
@@ -52,18 +38,13 @@ interface Datos {
     promedio: number;
 }
 
-function getErrMsg(e: unknown, fallback = "Ocurrió un error") {
-    const maybe = e as { response?: { data?: { message?: string } } };
-    return maybe?.response?.data?.message ?? fallback;
-}
-
-const Formulario: React.FC = () => {
+const Registro: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
-    const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { token } = useAuth();
 
-    const { token, setToken } = useAuth();
-
-    const [datos, setDatos] = useState<Datos>({
+    const [datos] = useState<Datos>({
         nombre: "Diana Karen",
         primerApellido: "Herrera",
         segundoApellido: "Carrillo",
@@ -81,13 +62,7 @@ const Formulario: React.FC = () => {
     });
 
     const [correo, setCorreo] = useState("");
-    const [otp, setOtp] = useState("");
-    const [msg, setMsg] = useState<string | null>(null);
-    const [loadingEnviar, setLoadingEnviar] = useState(false);
-    const [loadingValidar, setLoadingValidar] = useState(false);
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const { msg, sendCode, loadingEnviar } = useOtp();
 
     const validarNumeroCuenta = () => {
         const permitidos = ["1", "306", "307", "308", "309", "310", "311"];
@@ -97,57 +72,16 @@ const Formulario: React.FC = () => {
     };
 
     const handleValidarCorreo = async () => {
-        try {
-            setMsg(null);
-            setLoadingEnviar(true);
-            await solicitarCodigo(correo.trim());
-            setMsg("El código se envió a tu correo");
-            handleOpen();
-        } catch (e) {
-            setMsg(getErrMsg(e, "No se pudo enviar el código"));
-        } finally {
-            setLoadingEnviar(false);
-        }
-    };
-
-    const loadData = async () => {
-        const { data } = await api.post<Datos>("/alumno/buscar");
-        setDatos(data);
-    };
-
-    const handleValidarCodigo = async () => {
-        try {
-            setMsg(null);
-            setLoadingValidar(true);
-
-            const res = await altaUsuarioYToken({
-                numeroCuenta: alumno.numeroCuenta.trim(),
-                curp: alumno.curp.trim(),
-                correo: correo.trim(),
-                codigo: otp.trim(),
+        const ok = await sendCode(correo.trim());
+        if (ok) {
+            navigate("/verificacion", {
+                state: {
+                    numeroCuenta: alumno.numeroCuenta,
+                    correo,
+                    curp: alumno.curp ?? "",
+                    background: location,
+                },
             });
-
-            if (res?.token) {
-                setToken(res.token);
-            } else {
-                const login = await loginConCredenciales(
-                    alumno.numeroCuenta.trim(),
-                    alumno.curp.trim()
-                );
-                setToken(login.token);
-            }
-
-            handleClose();
-
-            // precargar datos del alumno
-            await loadData();
-
-            // avanza al siguiente paso
-            setActiveStep((s) => s + 1);
-        } catch (e) {
-            setMsg(getErrMsg(e, "Código inválido o expirado"));
-        } finally {
-            setLoadingValidar(false);
         }
     };
 
@@ -165,7 +99,7 @@ const Formulario: React.FC = () => {
                         />
                         <CampoCorreoElectronico value={correo} onChange={setCorreo} />
                         {!!msg && (
-                            <Typography sx={{ mt: 1 }} color={/✅/.test(msg) ? "success.main" : "error"}>
+                            <Typography sx={{ mt: 1 }} color={msg.includes("envió") ? "success.main" : "error"}>
                                 {msg}
                             </Typography>
                         )}
@@ -251,24 +185,8 @@ const Formulario: React.FC = () => {
                     </Button>
                 )}
             </Box>
-
-            <Modal open={open} onClose={handleClose}>
-                <Box sx={style}>
-                    <Typography variant="h6" component="h2">
-                        Ingresa el código que enviamos a tu correo:
-                    </Typography>
-                    <CampoCodigoVerificacion value={otp} onChange={setOtp} onComplete={setOtp} />
-                    <Button
-                        sx={{ mt: 2 }}
-                        onClick={handleValidarCodigo}
-                        disabled={otp.length < 6 || loadingValidar}
-                    >
-                        {loadingValidar ? "Validando…" : "Validar"}
-                    </Button>
-                </Box>
-            </Modal>
         </Box>
     );
 };
 
-export default Formulario;
+export default Registro;

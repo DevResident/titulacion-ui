@@ -4,7 +4,7 @@ import { Box, Button, Typography, IconButton, Dialog, DialogContent } from '@mui
 import UploadIcon from '@mui/icons-material/Upload';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { HELP_FRAGMENTS, fileMatchesAccept } from '../utils/Constantes';
+import { HELP_FRAGMENTS, fileMatchesAccept } from '../utils/constantes.ts';
 
 
 // @ts-ignore
@@ -52,6 +52,7 @@ export default function CampoArchivo(props) {
     const openPreview = () => {
         if (!file || !previewUrl) return;
         if (previewIsPdf) {
+
             // Visor nativo del navegador en una nueva pestaña
             window.open(previewUrl, '_blank', 'noopener,noreferrer');
         } else {
