@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+
+import {Box, Step, StepLabel, Stepper, Button, Modal, Typography} from "@mui/material";
+
 import { useAuth } from '../context/useAuth';
 import { solicitarCodigo, altaUsuarioYToken, loginConCredenciales } from '../services/auth.ts';
 import api from "../services/api";
@@ -15,8 +18,6 @@ import CampoCodigoVerificacion from "./CampoCodigoVerificacion.tsx";
 import CampoArchivo from "./CampoArchivo.tsx";
 import CampoNumeroCuenta from "./CampoNumeroCuenta.tsx";
 import { REQUISITOS } from "../utils/Constantes.ts";
-
-import {Box, Step, StepLabel, Stepper, Button, Modal, Typography} from "@mui/material";
 
 const style = {
     position: "absolute" as const,
