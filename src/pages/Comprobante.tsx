@@ -11,7 +11,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PrintIcon from "@mui/icons-material/Print";
-import { getComprobantePdf } from "../services/comprobante";
+import { getComprobantePdf, getFilenameFromHeaders} from "../services/comprobante";
 
 type ApiError = { response?: { data?: { message?: string } } };
 
@@ -19,20 +19,20 @@ export default function Comprobante() {
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
+    const [filename, setFilename] = useState<string>('comprobante.pdf');
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     const fetchPdf = async (): Promise<void> => {
         setErr(null);
         setLoading(true);
         try {
-            const blob = await getComprobantePdf(); // Blob (application/pdf)
-            if (!(blob instanceof Blob)) {
-                setErr("Respuesta inválida del servidor.");
-                return;
-            }
-            const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
-            // Limpia URL anterior si existía
-            setPdfUrl((prev) => {
+            // Modifica getComprobantePdf para que devuelva la respuesta completa
+            const { blob, headers } = await getComprobantePdf();
+            const extractedFilename = getFilenameFromHeaders(headers);
+            setFilename(extractedFilename);
+
+            const url = URL.createObjectURL(blob);
+            setPdfUrl(prev => {
                 if (prev) URL.revokeObjectURL(prev);
                 return url;
             });
@@ -41,6 +41,10 @@ export default function Comprobante() {
                 (e as ApiError)?.response?.data?.message ||
                 (e instanceof Error ? e.message : null) ||
                 "No se pudo generar tu comprobante.";
+            setPdfUrl(prev => {
+                if (prev) URL.revokeObjectURL(prev);
+                return null;
+            });
             setErr(message);
         } finally {
             setLoading(false);
@@ -59,7 +63,7 @@ export default function Comprobante() {
         if (!pdfUrl) return;
         const a = document.createElement("a");
         a.href = pdfUrl;
-        a.download = "comprobante-titulacion.pdf";
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();

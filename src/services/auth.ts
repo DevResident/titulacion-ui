@@ -6,16 +6,19 @@ export type AltaUsuarioPayload = {
     correo: string;
     codigo: string;        // OTP
 };
+export type Payload = {
+    correo: string;
+};
 
 // enviar OTP al correo
-export async function solicitarCodigo(correo: string) {
-    return api.post('/usuarios/solicitar-codigo', { correo });
+export async function solicitarCodigo(correo: Payload) {
+    return api.post('/usuario/solicitar-codigo', { correo });
 }
 
 // alta de usuario
 export async function altaUsuarioYToken(payload: AltaUsuarioPayload) {
 
-    const { data } = await api.post('/usuarios/alta', payload);
+    const { data } = await api.post('/usuario/alta', payload);
     return data;
 }
 

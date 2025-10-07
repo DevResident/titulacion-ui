@@ -22,7 +22,7 @@ interface Datos {
 type NavState = {
     numeroCuenta: string;
     correo: string;
-    curp?: string; // opcional
+    curp?: string; // sigue siendo
 };
 
 export default function Verificacion() {
@@ -54,7 +54,7 @@ export default function Verificacion() {
         }
     };
 
-    // si alguien entra directo sin state, regrésalo a registro
+    // si alguien entra directo sin state, regresa registro
     if (!state?.numeroCuenta || !state?.correo) {
         navigate("/registro", { replace: true });
         return null;
