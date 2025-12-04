@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import {solicitarCodigo, altaUsuarioYToken, loginConCredenciales, type Payload} from "../services/auth";
+import {solicitarCodigo, altaUsuarioYToken, loginConCredenciales} from "../services/auth";
 import { getErrMsg } from "../utils/errors";
 
 type VerifyParams = {
@@ -19,7 +19,7 @@ export function useOtp() {
     const [loadingEnviar, setLoadingEnviar] = useState(false);
     const [loadingValidar, setLoadingValidar] = useState(false);
 
-    const sendCode = useCallback(async (correo: Payload) => {
+    const sendCode = useCallback(async (correo: string) => {
         try {
             setMsg(null);
             setLoadingEnviar(true);
