@@ -15,7 +15,6 @@ interface Datos {
 
 export type AltaUsuarioPayload = {
     numeroCuenta: string;  // (antes “usuario”)
-    curp: string;          // (antes “contrasenia”, renómbralo en BE cuando puedas)
     correo: string;
     codigo: string;        // OTP
 };
@@ -28,9 +27,9 @@ export async function altaUsuarioYToken(payload: AltaUsuarioPayload) {
 }
 
 // recepción del token
-export async function loginConCredenciales(usuario: string, contrasenia: string) {
+export async function loginConCredenciales(usuario: string, correo: string, codigo: string) {
     // /auth/login devuelve { token } si credenciales correctas
-    const { data } = await api.post('/auth/login', { usuario, contrasenia });
+    const { data } = await api.post('/auth/login', { usuario, correo, codigo });
     return data; // { token }
 }
 

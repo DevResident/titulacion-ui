@@ -22,7 +22,7 @@ interface Datos {
 type NavState = {
     numeroCuenta: string;
     correo: string;
-    curp?: string; // sigue siendo
+    usuario: string; // sigue siendo
 };
 
 export default function Verificacion() {
@@ -37,7 +37,6 @@ export default function Verificacion() {
     const handleValidar = async () => {
         const tok = await verify({
             numeroCuenta: state.numeroCuenta || "",
-            curp: state.curp || "",
             correo: state.correo || "",
             codigo: otp,
         });

@@ -4,7 +4,6 @@ import { getErrMsg } from "../utils/errors";
 
 type VerifyParams = {
     numeroCuenta: string;
-    curp: string;            // si no aplica, manda "" (el backend ignora)
     correo: string;
     codigo: string;          // OTP
 };
@@ -45,7 +44,6 @@ export function useOtp() {
 
             const res = await altaUsuarioYToken({
                 numeroCuenta: params.numeroCuenta.trim(),
-                curp: params.curp.trim(),
                 correo: params.correo.trim(),
                 codigo: params.codigo.trim(),
             });
@@ -55,7 +53,8 @@ export function useOtp() {
             // Fallback: login con credenciales (según tu flujo actual)
             const login = await loginConCredenciales(
                 params.numeroCuenta.trim(),
-                params.curp.trim()
+                params.correo.trim(),
+                params.codigo.trim()
             );
             return login.token;
         } catch (e) {
