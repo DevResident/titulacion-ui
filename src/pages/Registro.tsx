@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {Box, Step, StepLabel, Stepper, Button, Typography} from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -58,7 +58,6 @@ const Registro: React.FC = () => {
 
     const [alumno, setAlumno] = useState({
         numeroCuenta: "311217995",
-        curp: "",
     });
 
     const [correo, setCorreo] = useState("");
@@ -71,6 +70,12 @@ const Registro: React.FC = () => {
         );
     };
 
+    useEffect( () => {
+        if(location.state?.step !== undefined){
+            setActiveStep(location.state.step)
+        }
+    }, [location.state?.step]);
+
     const handleValidarCorreo = async () => {
         const ok = await sendCode(correo.trim());
         if (ok) {
@@ -78,7 +83,6 @@ const Registro: React.FC = () => {
                 state: {
                     numeroCuenta: alumno.numeroCuenta,
                     correo,
-                    curp: alumno.curp ?? "",
                     background: location,
                 },
             });
@@ -89,6 +93,7 @@ const Registro: React.FC = () => {
     const handleBack = () => setActiveStep((prev) => prev - 1);
 
     const renderStepContent = (step: number) => {
+
         switch (step) {
             case 0:
                 return (

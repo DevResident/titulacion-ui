@@ -19,10 +19,11 @@ interface Datos {
     promedio: number;
 }
 
+
 type NavState = {
     numeroCuenta: string;
     correo: string;
-    usuario: string; // sigue siendo
+    codigo: string; // sigue siendo
 };
 
 export default function Verificacion() {
@@ -45,9 +46,20 @@ export default function Verificacion() {
 
         // opcional: precargar datos de alumno y dejarlos en history.state si quieres
         try {
-            const { data }: AxiosResponse<Datos> = await api.post("/alumno/buscar");
+            const { data }: AxiosResponse<Datos> = await api.post(
+                "/usuario/alta",
+                {
+                    numeroCuenta: state.numeroCuenta,
+                    correo: state.correo,
+                    codigo: otp
+                });
             // regresa a registro y avanza
-            navigate("/registro", { replace: true, state: { precargado: data } });
+            navigate("/registro", { replace: true,
+                state: {
+                    step: 1,
+                    precargado: data
+                }
+            });
         } catch {
             navigate("/registro", { replace: true });
         }
