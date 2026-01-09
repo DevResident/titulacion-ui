@@ -57,7 +57,8 @@ export default function Verificacion() {
             navigate("/registro", { replace: true,
                 state: {
                     step: 1,
-                    precargado: data
+                    precargado: data,
+                    token: tok //esto se añadió
                 }
             });
         } catch {
