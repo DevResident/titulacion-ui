@@ -16,6 +16,7 @@ import CampoNumeroCuenta from "../components/CampoNumeroCuenta.tsx";
 import { REQUISITOS } from "../utils/constantes.ts";
 import { useAuth } from '../hooks/useAuth.ts';
 import { useOtp } from "../hooks/useOtp.ts";
+import api from "../services/api.ts";
 
 const steps = [
     "Valida tu identidad",
@@ -42,19 +43,10 @@ const Registro: React.FC = () => {
     const [activeStep, setActiveStep] = useState(0);
     const navigate = useNavigate();
     const location = useLocation();
+    const navState = location.state;
     const { token } = useAuth();
 
-    const [datos] = useState<Datos>({
-        nombre: "Diana Karen",
-        primerApellido: "Herrera",
-        segundoApellido: "Carrillo",
-        sexo: "F",
-        nacionalidad: "Mexicana",
-        licenciatura: "Informatica",
-        sistema: "Escolarizado",
-        ingreso: "2014",
-        promedio: 9.46,
-    });
+    const [datos, setDatos] = useState<Datos | null>(null);
 
     const [alumno, setAlumno] = useState({
         numeroCuenta: "311217995",
@@ -70,11 +62,31 @@ const Registro: React.FC = () => {
         );
     };
 
+    //Manejo de cambios en el stepper
     useEffect( () => {
         if(location.state?.step !== undefined){
             setActiveStep(location.state.step)
         }
     }, [location.state?.step]);
+
+    //Esperar explícitamente al token
+    useEffect(() => {
+        if (navState?.step !== undefined) {
+            setActiveStep(navState.step);
+        }
+    }, []);
+
+    //Llamar a la API para los datos del alumno
+    useEffect(() => {
+        if (!token) return;
+
+        const fetchAlumno = async () => {
+            const res = await api.post("/alumno/buscar");
+            setDatos(res.data);
+        };
+
+        fetchAlumno();
+    }, [token]);
 
     const handleValidarCorreo = async () => {
         const ok = await sendCode(correo.trim());
@@ -110,8 +122,9 @@ const Registro: React.FC = () => {
                         )}
                     </Box>
                 );
+
             case 1:
-                return (
+                return datos ? (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <FormularioDatosPersonales
                             nombre={datos.nombre}
@@ -121,21 +134,27 @@ const Registro: React.FC = () => {
                             nacionalidad={datos.nacionalidad}
                         />
                     </Box>
+                ) : (
+                    <Typography>Cargando datos personales...</Typography>
                 );
             case 2:
-                return (
+                return datos ? (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <CampoProcedencia />
                         <CampoLicenciatura licenciatura={datos.licenciatura} />
                         <CampoSistema sistema={datos.sistema} />
                     </Box>
+                ) : (
+                    <Typography>Cargando datos de procedencia académica...</Typography>
                 );
             case 3:
-                return (
+                return datos ? (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <CampoAnioIngreso ingreso={datos.ingreso} />
                         <CampoPromedio promedio={datos.promedio} />
                     </Box>
+                ) : (
+                    <Typography>Cargando datos adicionales...</Typography>
                 );
             case 4:
                 return (
