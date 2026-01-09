@@ -49,7 +49,7 @@ const Registro: React.FC = () => {
     const [datos, setDatos] = useState<Datos | null>(null);
 
     const [alumno, setAlumno] = useState({
-        numeroCuenta: "311217995",
+        numeroCuenta: "",
     });
 
     const [correo, setCorreo] = useState("");
