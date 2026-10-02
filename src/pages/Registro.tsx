@@ -62,6 +62,18 @@ const Registro: React.FC = () => {
         );
     };
 
+    type TiposDocumento =
+        | "FOTO"
+        | "COMPROBANTE_IDIOMA"
+        | "SERVICIO_SOCIAL"
+        | "PUNTOS_CULTURALES"
+        | "HISTORIA_ACADEMICA"
+        | "CERTIFICADO_SECUNDARIA";
+
+    const [archivos, setArchivos] = useState<
+        Partial<Record<TiposDocumento, File>>
+    >({});
+
     //Manejo de cambios en el stepper
     useEffect( () => {
         if(location.state?.step !== undefined){
@@ -87,6 +99,7 @@ const Registro: React.FC = () => {
 
         fetchAlumno();
     }, [token]);
+
 
     const handleValidarCorreo = async () => {
         const ok = await sendCode(correo.trim());

@@ -6,9 +6,17 @@ import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { HELP_FRAGMENTS, fileMatchesAccept } from '../utils/constantes.ts';
 
+interface CampoArchivoProps{
+    CFG: {
+        label: string,
+        accept: string,
+        help: (keyof typeof HELP_FRAGMENTS)[];
+    };
+    onFileSelected: (file: File | null) => void;
+}
 
 // @ts-ignore
-export default function CampoArchivo(props) {
+export default function CampoArchivo(props: CampoArchivoProps) {
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -31,11 +39,13 @@ export default function CampoArchivo(props) {
         if (!fileMatchesAccept(f, props.CFG.accept)) {
             setError('Formato inválido.');
             setFile(null);
+            props.onFileSelected(null);
             return;
         }
 
         setError('');
         setFile(f);
+        props.onFileSelected(f)
         // marca si es PDF (por tipo o extensión)
         setPreviewIsPdf(
             f.type === 'application/pdf' || /\.pdf$/i.test(f.name)
